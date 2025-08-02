@@ -1,0 +1,189 @@
+{
+  "name": "Automate Data Extraction and Summarization using N8N tool",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        -48
+      ],
+      "id": "ae3c7da0-6d65-415b-b1de-be7bca11dff8",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1UVBUUYMZalAv9WgOUCdM8wnZMSx3JPB6",
+          "mode": "list",
+          "cachedResultName": "Assigment_Excel_.xlsx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UVBUUYMZalAv9WgOUCdM8wnZMSx3JPB6/edit?usp=drivesdk&ouid=110266028893308518810&rtpof=true&sd=true"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        -48
+      ],
+      "id": "19eda2bc-e53d-4bac-8375-c49907446c72",
+      "name": "Download Excel from Google Drive",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "mv6t75fRlWHQFTd3",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -48
+      ],
+      "id": "5792a4ac-f450-4239-a259-da55d2e305bf",
+      "name": "Extract Data from Excel"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = {};\nitems.forEach(item => {\n  const market = item.json[\"Market Name\"];\n  const price = parseFloat(item.json[\"Modal Price (Rs./Quintal)\"]) || 0;\n  if (!result[market]) result[market] = 0;\n  result[market] += price;\n});\nreturn Object.entries(result).map(([market, total]) => ({\n  json: {\n    \"Market Name\": market,\n    \"Total Modal Price (Rs./Quintal)\": total\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -48
+      ],
+      "id": "86f8a702-f7a8-4c09-8146-1c4e69df6ef6",
+      "name": "Summarize by Market Name"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "fileName": "Summary.xlsx",
+          "sheetName": "Summary"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        -48
+      ],
+      "id": "9a926b72-bff3-4f80-bde9-6581cf84255d",
+      "name": "Create Summary Excel File"
+    },
+    {
+      "parameters": {
+        "name": "Final Summary Sheet",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "15N5lOQzUsizycQFiwZ2dVB-sScCd-d7L",
+          "mode": "list",
+          "cachedResultName": "assignment",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/15N5lOQzUsizycQFiwZ2dVB-sScCd-d7L"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        640,
+        -48
+      ],
+      "id": "849b40e9-e34f-4a38-964e-a221e0e785e2",
+      "name": "Upload Summary to Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "mv6t75fRlWHQFTd3",
+          "name": "Google Drive account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download Excel from Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Excel from Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Extract Data from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Data from Excel": {
+      "main": [
+        [
+          {
+            "node": "Summarize by Market Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize by Market Name": {
+      "main": [
+        [
+          {
+            "node": "Create Summary Excel File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Summary Excel File": {
+      "main": [
+        [
+          {
+            "node": "Upload Summary to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "60a3ddcf-f3e6-42b7-9985-1a95911552db",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fc650fc9b7e162f649cd344051e7be42f95f4e188ef9538832300a254cbceded"
+  },
+  "id": "FtgltUi4CzMNXJIU",
+  "tags": []
+}
